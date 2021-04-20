@@ -1,3 +1,5 @@
+import { DataDocument } from 'src/schemas/data.schema';
+
 export interface CacheType<DataT = any> {
   /** Cache store component */
   store: any;
@@ -9,10 +11,10 @@ export interface CacheType<DataT = any> {
   keys(): Promise<Partial<DataT>[]>;
 
   /** Store key -> value for time to live */
-  set(key: string, value: string, ttl: number): Promise<void>;
+  set(value: string, ttl: number): Promise<DataT>;
 
   /** Update and store key -> value for time to live(TTL) */
-  update(key: string, value: string, ttl: number): Promise<void>;
+  update(key: string, value: string, ttl: number): Promise<DataDocument>;
 
   /** Delete value associate to cache */
   del(key: string): Promise<void>;
