@@ -9,9 +9,9 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { DataDocument } from 'src/schemas/data.schema';
+import { Data } from 'src/schemas/data.schema';
 import { DataService } from './data.service';
-import { dataDto } from './dot/data.dto';
+import { dataDto } from './dto/data.dto';
 
 @Controller('data')
 export class DataController {
@@ -19,19 +19,19 @@ export class DataController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  getKeys(): Promise<Partial<DataDocument | '_d'>[]> {
+  getKeys(): Promise<Partial<Data | '_d'>[]> {
     return this.dataService.getKeys();
   }
 
   @Get('/:key')
   @HttpCode(HttpStatus.OK)
-  getDataByKey(@Param('key') key: string): Promise<DataDocument> {
+  getDataByKey(@Param('key') key: string): Promise<Data> {
     return this.dataService.getDataByKey(key);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createData(@Body() createDataDto: dataDto): Promise<DataDocument> {
+  createData(@Body() createDataDto: dataDto): Promise<Data> {
     return this.dataService.createData(createDataDto);
   }
 
@@ -40,7 +40,7 @@ export class DataController {
   updateData(
     @Param('key') key: string,
     @Body() updateDataDto: dataDto,
-  ): Promise<DataDocument> {
+  ): Promise<Data> {
     return this.dataService.updateDataByKey(key, updateDataDto);
   }
 

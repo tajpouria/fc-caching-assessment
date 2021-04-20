@@ -1,15 +1,21 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Schema } from 'mongoose';
 import { Document } from 'mongoose';
+import { envConst } from 'src/constants/env.const';
 
-export type DataDocument = Data & Document;
-
-@Schema({ versionKey: false })
-export class Data {
-  @Prop({ required: true })
-  value: string;
-}
-
-export const DataSchema = SchemaFactory.createForClass(Data);
+export const DataSchema = new Schema(
+  {
+    value: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    capped: {
+      size: 1024,
+      max: parseInt(envConst.CACHE_MAX_RECORD_COUNTS),
+    },
+  },
+);
 
 DataSchema.method('toJSON', function() {
   const obj: any = this.toObject();
@@ -17,3 +23,7 @@ DataSchema.method('toJSON', function() {
   delete obj._id;
   return obj;
 });
+
+export interface Data extends Document {
+  readonly value: string;
+}

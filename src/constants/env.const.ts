@@ -1,4 +1,8 @@
-const { MONGO_DB_CONNECTION_URL, CACHE_DEFAULT_TTL_SEC } = process.env;
+const {
+  MONGO_DB_CONNECTION_URL,
+  CACHE_DEFAULT_TTL_SEC,
+  CACHE_MAX_RECORD_COUNTS,
+} = process.env;
 
 /**
  * Exposes environments constants
@@ -10,4 +14,10 @@ export const envConst: Record<string, string | null> = {
 
   /** Cache default time to live  */
   CACHE_DEFAULT_TTL_SEC: CACHE_DEFAULT_TTL_SEC || '1000',
+
+  /**
+   * Designate the maximum number of the record that can store inside the cache
+   * @link https://docs.mongodb.com/manual/core/capped-collections/#capped-collections
+   */
+  CACHE_MAX_RECORD_COUNTS: CACHE_MAX_RECORD_COUNTS || '10',
 };

@@ -1,12 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { Data, DataDocument } from 'src/schemas/data.schema';
+import { Data } from 'src/schemas/data.schema';
 import { CacheType } from 'src/types/cache.type';
 
 @Injectable()
-export class MongoDataCacheUtil implements CacheType<DataDocument> {
-  constructor(@InjectModel(Data.name) public store: Model<DataDocument>) {}
+export class MongoDataCacheUtil implements CacheType<Data> {
+  constructor(
+    @Inject('DATA_MODEL')
+    public store: Model<Data>,
+  ) {}
 
   private READ_DATA_TIMEOUT_MS = 5000;
   private WRITE_DATA_TIMEOUT_MS = 10000;
@@ -15,7 +17,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * Retrieve data by key
    * @param key
    */
-  async get(key: string): Promise<DataDocument | null> {
+  async get(key: string): Promise<Data | null> {
     const res = await this.store.findById(key, '_id value', {
       maxTimeMS: this.READ_DATA_TIMEOUT_MS,
     });
@@ -25,7 +27,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
   /**
    * Retrieve a list of keys
    */
-  async keys(): Promise<Pick<DataDocument, '_id'>[]> {
+  async keys(): Promise<Pick<Data, '_id'>[]> {
     const res = await this.store.find({}, '_id', {
       maxTimeMS: this.READ_DATA_TIMEOUT_MS,
     });
@@ -38,7 +40,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param value
    * @param ttl
    */
-  async set(value: string, ttl: number): Promise<DataDocument> {
+  async set(value: string, ttl: number): Promise<Data> {
     return await this.store.findOneAndReplace(
       { value },
       { value },
@@ -52,7 +54,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param value
    * @param ttl
    */
-  async update(key: string, value: string, ttl: number): Promise<DataDocument> {
+  async update(key: string, value: string, ttl: number): Promise<Data> {
     return await this.store.findOneAndReplace({ _id: key }, { value });
   }
 
