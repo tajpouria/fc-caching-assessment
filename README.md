@@ -10,7 +10,7 @@ Assuming application running on an environment with **Node >= 10.13.0 and NPM >=
 | ----------------------- | ------------------------------------------------------------------------------------------ |
 | MONGO_DB_CONNECTION_URL | Mongo DB instance connection URL, ( default: `mongodb://localhost:27017/data` )            |
 | CACHE_DEFAULT_TTL_SEC   | Cached data default time to live in seconds. ( default: `120` )                            |
-| CACHE_MAX_RECORD_COUNTS | Designate the maximum number of the record that can store in the cache. ( default: `120` ) |
+| CACHE_MAX_RECORD_COUNTS | Designate the maximum number of the record that can store in the cache. ( default: `10` ) |
 | ARB_AUTH_TOKEN          | An arbitrary authorization token to manage access. ( default: `not set` )                  |
 
 ## Commands
