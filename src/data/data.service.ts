@@ -41,7 +41,7 @@ export class DataService {
     try {
       Types.ObjectId(key);
     } catch (error) {
-      logger.info('Cache hit');
+      logger.info('Cache miss');
       return this.dataCacheUtil.set(name.firstName(), ttl);
     }
 
