@@ -13,7 +13,9 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param key
    */
   async get(key: string): Promise<DataDocument | null> {
-    const res = await this.store.findById(key, '_id value');
+    const res = await this.store.findById(key, '_id value', {
+      maxTimeMS: 5000,
+    });
     return res;
   }
 
@@ -21,7 +23,9 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * Retrieve a list of keys
    */
   async keys(): Promise<Pick<DataDocument, '_id'>[]> {
-    const res = await this.store.find({}, '_id');
+    const res = await this.store.find({}, '_id', {
+      maxTimeMS: 5000,
+    });
     return res;
   }
 
@@ -31,8 +35,8 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param value
    * @param ttl
    */
-  async set(key: string, value: string, ttl: number): Promise<void> {
-    await this.store.create({ _id: key, value });
+  async set(value: string, ttl: number): Promise<DataDocument> {
+    return await this.store.create({ value });
   }
 
   /**
@@ -42,7 +46,13 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param ttl
    */
   async update(key: string, value: string, ttl: number): Promise<void> {
-    await this.store.findByIdAndUpdate(key, { value });
+    await this.store.findByIdAndUpdate(
+      key,
+      { value },
+      {
+        maxTimeMS: 5000,
+      },
+    );
   }
 
   /**
@@ -50,13 +60,20 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param key
    */
   async del(key: string): Promise<void> {
-    await this.store.findByIdAndDelete(key);
+    await this.store.findByIdAndDelete(key, {
+      maxTimeMS: 5000,
+    });
   }
 
   /**
    * Wipe the cache
    */
   async flush(): Promise<void> {
-    await this.store.deleteMany({});
+    await this.store.deleteMany(
+      {},
+      {
+        maxTimeMS: 1000,
+      },
+    );
   }
 }

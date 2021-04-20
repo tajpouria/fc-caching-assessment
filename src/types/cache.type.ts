@@ -9,7 +9,7 @@ export interface CacheType<DataT = any> {
   keys(): Promise<Partial<DataT>[]>;
 
   /** Store key -> value for time to live */
-  set(key: string, value: string, ttl: number): Promise<void>;
+  set(value: string, ttl: number): Promise<DataT>;
 
   /** Update and store key -> value for time to live(TTL) */
   update(key: string, value: string, ttl: number): Promise<void>;
