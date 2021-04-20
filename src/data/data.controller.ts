@@ -8,8 +8,17 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthGuard } from 'src/guards/auth.guard';
 import { Data } from 'src/schemas/data.schema';
 import { DataService } from './data.service';
 import { dataDto } from './dto/data.dto';
@@ -20,6 +29,7 @@ export class DataController {
   constructor(private dataService: DataService) {}
 
   @ApiOperation({ description: 'Retrieve cache keys' })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Retrieve a list of cached record keys',
@@ -30,6 +40,7 @@ export class DataController {
   })
   @Get()
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new AuthGuard())
   getKeys(): Promise<Partial<Data | '_id'>[]> {
     return this.dataService.getKeys();
   }
@@ -38,6 +49,7 @@ export class DataController {
     description:
       'Retrieve existing record that is associated with specified key if there is any, or create a random one',
   })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'Retrieve existing record or create a random one',
@@ -54,6 +66,7 @@ export class DataController {
   })
   @Get('/:key')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new AuthGuard())
   getDataByKey(@Param('key') key: string): Promise<Data> {
     return this.dataService.getDataByKey(key);
   }
@@ -61,6 +74,7 @@ export class DataController {
   @ApiOperation({
     description: 'Create a record',
   })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 201,
     description: 'The record has been successfully created',
@@ -71,6 +85,7 @@ export class DataController {
   })
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(new AuthGuard())
   createData(@Body() createDataDto: dataDto): Promise<Data> {
     return this.dataService.createData(createDataDto);
   }
@@ -78,6 +93,7 @@ export class DataController {
   @ApiOperation({
     description: 'Update a cached record',
   })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully updated',
@@ -98,6 +114,7 @@ export class DataController {
   })
   @Patch('/:key')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(new AuthGuard())
   updateData(
     @Param('key') key: string,
     @Body() updateDataDto: dataDto,
@@ -108,6 +125,7 @@ export class DataController {
   @ApiOperation({
     description: 'Delete a cached record',
   })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 204,
     description: 'The record has been successfully deleted',
@@ -122,6 +140,7 @@ export class DataController {
   })
   @Delete('/')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(new AuthGuard())
   flushData(): Promise<void> {
     return this.dataService.flushData();
   }
@@ -129,6 +148,7 @@ export class DataController {
   @ApiOperation({
     description: 'Remove all the cached records',
   })
+  @ApiBearerAuth()
   @ApiResponse({
     status: 204,
     description: 'Cache flushed successfully',
@@ -145,6 +165,7 @@ export class DataController {
   })
   @Delete('/:key')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(new AuthGuard())
   deleteData(@Param('key') key: string): Promise<void> {
     return this.dataService.deleteDataByKey(key);
   }
