@@ -36,7 +36,11 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param ttl
    */
   async set(value: string, ttl: number): Promise<DataDocument> {
-    return await this.store.create({ value });
+    return await this.store.findOneAndReplace(
+      { value },
+      { value },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
   }
 
   /**
@@ -60,7 +64,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param key
    */
   async del(key: string): Promise<void> {
-    await this.store.findByIdAndDelete(key, {
+    await this.store.findByIdAndRemove(key, {
       maxTimeMS: 5000,
     });
   }
