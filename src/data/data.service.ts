@@ -81,7 +81,7 @@ export class DataService {
    * @param dataDto
    * @param ttl
    */
-  async updateData(
+  async updateDataByKey(
     key: string,
     { value }: dataDto,
     ttl = CACHE_DEFAULT_TTL,
@@ -102,5 +102,35 @@ export class DataService {
       throw new NotFoundException();
     }
     return res;
+  }
+
+  /**
+   * Delete Data
+   * @param key
+   * @param dataDto
+   */
+  async deleteDataByKey(key: string): Promise<void> {
+    try {
+      Types.ObjectId(key);
+    } catch (error) {
+      throw new BadRequestException(enMessages.invalidDataKey);
+    }
+
+    try {
+      await this.dataCacheUtil.del(key);
+    } catch (error) {
+      throw new ServiceUnavailableException();
+    }
+  }
+
+  /**
+   * Removes all records
+   */
+  async flushData(): Promise<void> {
+    try {
+      await this.dataCacheUtil.flush();
+    } catch (error) {
+      throw new ServiceUnavailableException();
+    }
   }
 }

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -40,6 +41,18 @@ export class DataController {
     @Param('key') key: string,
     @Body() updateDataDto: dataDto,
   ): Promise<DataDocument> {
-    return this.dataService.updateData(key, updateDataDto);
+    return this.dataService.updateDataByKey(key, updateDataDto);
+  }
+
+  @Delete('/')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  flushData(): Promise<void> {
+    return this.dataService.flushData();
+  }
+
+  @Delete('/:key')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteData(@Param('key') key: string): Promise<void> {
+    return this.dataService.deleteDataByKey(key);
   }
 }

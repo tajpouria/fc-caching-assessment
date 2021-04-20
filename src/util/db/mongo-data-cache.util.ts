@@ -8,13 +8,16 @@ import { CacheType } from 'src/types/cache.type';
 export class MongoDataCacheUtil implements CacheType<DataDocument> {
   constructor(@InjectModel(Data.name) public store: Model<DataDocument>) {}
 
+  private READ_DATA_TIMEOUT_MS = 5000;
+  private WRITE_DATA_TIMEOUT_MS = 10000;
+
   /**
    * Retrieve data by key
    * @param key
    */
   async get(key: string): Promise<DataDocument | null> {
     const res = await this.store.findById(key, '_id value', {
-      maxTimeMS: 5000,
+      maxTimeMS: this.READ_DATA_TIMEOUT_MS,
     });
     return res;
   }
@@ -24,7 +27,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    */
   async keys(): Promise<Pick<DataDocument, '_id'>[]> {
     const res = await this.store.find({}, '_id', {
-      maxTimeMS: 5000,
+      maxTimeMS: this.READ_DATA_TIMEOUT_MS,
     });
     return res;
   }
@@ -50,7 +53,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param ttl
    */
   async update(key: string, value: string, ttl: number): Promise<DataDocument> {
-    return await this.store.findByIdAndUpdate(key, { value });
+    return await this.store.findOneAndReplace({ _id: key }, { value });
   }
 
   /**
@@ -58,9 +61,12 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param key
    */
   async del(key: string): Promise<void> {
-    await this.store.findByIdAndRemove(key, {
-      maxTimeMS: 5000,
-    });
+    await this.store.findOneAndRemove(
+      { _id: key },
+      {
+        maxTimeMS: this.READ_DATA_TIMEOUT_MS,
+      },
+    );
   }
 
   /**
@@ -70,7 +76,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
     await this.store.deleteMany(
       {},
       {
-        maxTimeMS: 1000,
+        maxTimeMS: this.WRITE_DATA_TIMEOUT_MS,
       },
     );
   }
