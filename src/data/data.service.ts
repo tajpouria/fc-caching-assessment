@@ -12,6 +12,18 @@ export class DataService {
   constructor(private dataCacheUtil: MongoDataCacheUtil) {}
 
   /**
+   * Retrieve cache keys
+   * @param key
+   */
+  async getKeys(): Promise<Partial<DataDocument | '_d'>[]> {
+    try {
+      return this.dataCacheUtil.keys();
+    } catch (error) {
+      throw new ServiceUnavailableException();
+    }
+  }
+
+  /**
    * Retrieve data document that associated to specified key
    * @param key
    */
@@ -27,7 +39,6 @@ export class DataService {
 
       return this.dataCacheUtil.set(commerce.product(), ttl);
     } catch (error) {
-      console.info(error);
       throw new ServiceUnavailableException();
     }
   }

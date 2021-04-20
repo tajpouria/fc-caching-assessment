@@ -6,6 +6,12 @@ import { DataService } from './data.service';
 export class DataController {
   constructor(private dataService: DataService) {}
 
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  getKeys(): Promise<Partial<DataDocument | '_d'>[]> {
+    return this.dataService.getKeys();
+  }
+
   @Get('/:key')
   @HttpCode(HttpStatus.OK)
   getDataByKey(@Param('key') key: string): Promise<DataDocument> {
