@@ -13,7 +13,7 @@ export const envConst: Record<string, string | null> = {
   MONGO_DB_CONNECTION_URL:
     MONGO_DB_CONNECTION_URL || 'mongodb://localhost:27017/data',
 
-  /** Cache default time to live  */
+  /** Cache default time to live */
   CACHE_DEFAULT_TTL_SEC: CACHE_DEFAULT_TTL_SEC || '120',
 
   /**
