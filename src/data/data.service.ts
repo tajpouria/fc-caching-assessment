@@ -23,7 +23,7 @@ export class DataService {
    * Retrieve cache keys
    * @param key
    */
-  async getKeys(): Promise<Partial<Data | '_d'>[]> {
+  async getKeys(): Promise<Partial<Data | '_id'>[]> {
     try {
       return this.dataCacheUtil.keys();
     } catch (error) {
