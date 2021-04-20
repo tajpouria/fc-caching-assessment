@@ -49,14 +49,8 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param value
    * @param ttl
    */
-  async update(key: string, value: string, ttl: number): Promise<void> {
-    await this.store.findByIdAndUpdate(
-      key,
-      { value },
-      {
-        maxTimeMS: 5000,
-      },
-    );
+  async update(key: string, value: string, ttl: number): Promise<DataDocument> {
+    return await this.store.findByIdAndUpdate(key, { value });
   }
 
   /**

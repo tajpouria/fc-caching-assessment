@@ -5,11 +5,12 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { DataDocument } from 'src/schemas/data.schema';
 import { DataService } from './data.service';
-import { CreateDataDto } from './dot/create-data.dto';
+import { dataDto } from './dot/data.dto';
 
 @Controller('data')
 export class DataController {
@@ -29,7 +30,16 @@ export class DataController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createData(@Body() createDataDto: CreateDataDto): Promise<DataDocument> {
+  createData(@Body() createDataDto: dataDto): Promise<DataDocument> {
     return this.dataService.createData(createDataDto);
+  }
+
+  @Patch('/:key')
+  @HttpCode(HttpStatus.OK)
+  updateData(
+    @Param('key') key: string,
+    @Body() updateDataDto: dataDto,
+  ): Promise<DataDocument> {
+    return this.dataService.updateData(key, updateDataDto);
   }
 }
