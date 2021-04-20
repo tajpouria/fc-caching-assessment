@@ -8,6 +8,7 @@ export const databaseProviders = [
       mongoose.connect(envConst.MONGO_DB_CONNECTION_URL, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
+        useFindAndModify: false,
       }),
   },
 ];
