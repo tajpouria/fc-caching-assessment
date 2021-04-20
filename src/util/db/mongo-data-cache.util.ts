@@ -1,34 +1,59 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { Data, DataDocument } from 'src/schemas/data.schema';
+import { envConst } from 'src/constants/env.const';
+import { Data } from 'src/schemas/data.schema';
 import { CacheType } from 'src/types/cache.type';
 
+const { CACHE_DEFAULT_TTL_SEC: _CACHE_DEFAULT_TTL_SEC } = envConst;
+const CACHE_DEFAULT_TTL_SEC = parseInt(_CACHE_DEFAULT_TTL_SEC);
+
 @Injectable()
-export class MongoDataCacheUtil implements CacheType<DataDocument> {
-  constructor(@InjectModel(Data.name) public store: Model<DataDocument>) {}
+export class MongoDataCacheUtil implements CacheType<Data> {
+  constructor(
+    @Inject('DATA_MODEL')
+    public store: Model<Data>,
+  ) {
+    this.calculateExpiryDataThreshold;
+  }
 
   private READ_DATA_TIMEOUT_MS = 5000;
   private WRITE_DATA_TIMEOUT_MS = 10000;
 
   /**
+   * Retrieve oldest valid expiration daytime
+   */
+  private get calculateExpiryDataThreshold(): Date {
+    const t = new Date();
+    t.setSeconds(t.getSeconds() - CACHE_DEFAULT_TTL_SEC);
+    return t;
+  }
+
+  /**
    * Retrieve data by key
    * @param key
    */
-  async get(key: string): Promise<DataDocument | null> {
-    const res = await this.store.findById(key, '_id value', {
-      maxTimeMS: this.READ_DATA_TIMEOUT_MS,
-    });
+  async get(key: string): Promise<Data | null> {
+    const res = await this.store.findOneAndUpdate(
+      { _id: key, updatedAt: { $gt: this.calculateExpiryDataThreshold } },
+      { updatedAt: new Date() },
+      {
+        maxTimeMS: this.READ_DATA_TIMEOUT_MS,
+      },
+    );
     return res;
   }
 
   /**
    * Retrieve a list of keys
    */
-  async keys(): Promise<Pick<DataDocument, '_id'>[]> {
-    const res = await this.store.find({}, '_id', {
-      maxTimeMS: this.READ_DATA_TIMEOUT_MS,
-    });
+  async keys(): Promise<Pick<Data, '_id'>[]> {
+    const res = await this.store.find(
+      { updatedAt: { $gt: this.calculateExpiryDataThreshold } },
+      '_id',
+      {
+        maxTimeMS: this.READ_DATA_TIMEOUT_MS,
+      },
+    );
     return res;
   }
 
@@ -38,7 +63,7 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param value
    * @param ttl
    */
-  async set(value: string, ttl: number): Promise<DataDocument> {
+  async set(value: string, ttl: number): Promise<Data> {
     return await this.store.findOneAndReplace(
       { value },
       { value },
@@ -52,8 +77,11 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param value
    * @param ttl
    */
-  async update(key: string, value: string, ttl: number): Promise<DataDocument> {
-    return await this.store.findOneAndReplace({ _id: key }, { value });
+  async update(key: string, value: string, ttl: number): Promise<Data> {
+    return await this.store.findOneAndUpdate(
+      { _id: key },
+      { value, updatedAt: new Date() },
+    );
   }
 
   /**
@@ -61,8 +89,9 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * @param key
    */
   async del(key: string): Promise<void> {
-    await this.store.findOneAndRemove(
+    await this.store.findOneAndUpdate(
       { _id: key },
+      { updatedAt: new Date('December 30, 1997 11:20:25') },
       {
         maxTimeMS: this.READ_DATA_TIMEOUT_MS,
       },
@@ -73,8 +102,9 @@ export class MongoDataCacheUtil implements CacheType<DataDocument> {
    * Wipe the cache
    */
   async flush(): Promise<void> {
-    await this.store.deleteMany(
+    await this.store.updateMany(
       {},
+      { updatedAt: new Date('December 30, 1997 11:20:25') },
       {
         maxTimeMS: this.WRITE_DATA_TIMEOUT_MS,
       },

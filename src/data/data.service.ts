@@ -4,11 +4,11 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { DataDocument } from 'src/schemas/data.schema';
+import { Data } from 'src/schemas/data.schema';
 import { MongoDataCacheUtil } from 'src/util/db/mongo-data-cache.util';
-import { commerce } from 'faker';
+import { name } from 'faker';
 import { envConst } from 'src/constants/env.const';
-import { dataDto } from './dot/data.dto';
+import { dataDto } from './dto/data.dto';
 import { Types } from 'mongoose';
 import { enMessages } from './i18n/en-messages.i18n';
 
@@ -23,7 +23,7 @@ export class DataService {
    * Retrieve cache keys
    * @param key
    */
-  async getKeys(): Promise<Partial<DataDocument | '_d'>[]> {
+  async getKeys(): Promise<Partial<Data | '_id'>[]> {
     try {
       return this.dataCacheUtil.keys();
     } catch (error) {
@@ -36,14 +36,11 @@ export class DataService {
    * @param key
    * @param ttl
    */
-  async getDataByKey(
-    key: string,
-    ttl = CACHE_DEFAULT_TTL,
-  ): Promise<DataDocument> {
+  async getDataByKey(key: string, ttl = CACHE_DEFAULT_TTL): Promise<Data> {
     try {
       Types.ObjectId(key);
     } catch (error) {
-      throw new BadRequestException(enMessages.invalidDataKey);
+      return this.dataCacheUtil.set(name.firstName(), ttl);
     }
 
     try {
@@ -52,7 +49,7 @@ export class DataService {
         return data;
       }
 
-      return this.dataCacheUtil.set(commerce.product(), ttl);
+      return this.dataCacheUtil.set(name.firstName(), ttl);
     } catch (error) {
       throw new ServiceUnavailableException();
     }
@@ -64,10 +61,7 @@ export class DataService {
    * @param dataDto
    * @param ttl
    */
-  async createData(
-    { value }: dataDto,
-    ttl = CACHE_DEFAULT_TTL,
-  ): Promise<DataDocument> {
+  async createData({ value }: dataDto, ttl = CACHE_DEFAULT_TTL): Promise<Data> {
     try {
       return this.dataCacheUtil.set(value, ttl);
     } catch (error) {
@@ -85,8 +79,8 @@ export class DataService {
     key: string,
     { value }: dataDto,
     ttl = CACHE_DEFAULT_TTL,
-  ): Promise<DataDocument> {
-    let res: DataDocument;
+  ): Promise<Data> {
+    let res: Data;
     try {
       Types.ObjectId(key);
     } catch (error) {
@@ -96,6 +90,10 @@ export class DataService {
     try {
       res = await this.dataCacheUtil.update(key, value, ttl);
     } catch (error) {
+      if (error.code === 10003) {
+        throw new BadRequestException(error.message);
+      }
+
       throw new ServiceUnavailableException();
     }
     if (!res) {

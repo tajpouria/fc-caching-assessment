@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { databaseProviders } from 'src/providers/database.providers';
+import { MongoDataCacheUtil } from 'src/util/db/mongo-data-cache.util';
 import { DataController } from './data.controller';
 import { DataService } from './data.service';
-import { Data, DataSchema } from '../schemas/data.schema';
-import { MongoDataCacheUtil } from 'src/util/db/mongo-data-cache.util';
+import { dataProviders } from './providers/data.providers';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Data.name, schema: DataSchema }]),
-  ],
   controllers: [DataController],
-  providers: [DataService, MongoDataCacheUtil],
+  providers: [
+    DataService,
+    MongoDataCacheUtil,
+    ...dataProviders,
+    ...databaseProviders,
+  ],
 })
 export class DataModule {}
