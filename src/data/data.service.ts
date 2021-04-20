@@ -11,6 +11,7 @@ import { envConst } from 'src/constants/env.const';
 import { dataDto } from './dto/data.dto';
 import { Types } from 'mongoose';
 import { enMessages } from './i18n/en-messages.i18n';
+import { logger } from 'src/util/log/logger.util';
 
 const { CACHE_DEFAULT_TTL_SEC: _CACHE_DEFAULT_TTL_SEC } = envConst;
 const CACHE_DEFAULT_TTL = parseInt(_CACHE_DEFAULT_TTL_SEC, 10);
@@ -40,15 +41,18 @@ export class DataService {
     try {
       Types.ObjectId(key);
     } catch (error) {
+      logger.info('Cache hit');
       return this.dataCacheUtil.set(name.firstName(), ttl);
     }
 
     try {
       const data = await this.dataCacheUtil.get(key);
       if (data) {
+        logger.info('Cache hit');
         return data;
       }
 
+      logger.info('Cache miss');
       return this.dataCacheUtil.set(name.firstName(), ttl);
     } catch (error) {
       throw new ServiceUnavailableException();
