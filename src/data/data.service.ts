@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Data } from 'src/schemas/data.schema';
 import { MongoDataCacheUtil } from 'src/util/db/mongo-data-cache.util';
-import { commerce } from 'faker';
+import { name } from 'faker';
 import { envConst } from 'src/constants/env.const';
 import { dataDto } from './dto/data.dto';
 import { Types } from 'mongoose';
@@ -40,7 +40,7 @@ export class DataService {
     try {
       Types.ObjectId(key);
     } catch (error) {
-      return this.dataCacheUtil.set(commerce.product(), ttl);
+      return this.dataCacheUtil.set(name.firstName(), ttl);
     }
 
     try {
@@ -49,7 +49,7 @@ export class DataService {
         return data;
       }
 
-      return this.dataCacheUtil.set(commerce.product(), ttl);
+      return this.dataCacheUtil.set(name.firstName(), ttl);
     } catch (error) {
       throw new ServiceUnavailableException();
     }
@@ -90,6 +90,10 @@ export class DataService {
     try {
       res = await this.dataCacheUtil.update(key, value, ttl);
     } catch (error) {
+      if (error.code === 10003) {
+        throw new BadRequestException(error.message);
+      }
+
       throw new ServiceUnavailableException();
     }
     if (!res) {

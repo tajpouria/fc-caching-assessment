@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 import { Document } from 'mongoose';
 import { envConst } from 'src/constants/env.const';
 
-const { CACHE_DEFAULT_TTL_SEC, CACHE_MAX_RECORD_COUNTS } = envConst;
+const { CACHE_MAX_RECORD_COUNTS } = envConst;
 
 export const DataSchema = new Schema(
   {
@@ -10,7 +10,7 @@ export const DataSchema = new Schema(
       type: String,
       required: true,
     },
-    updatedAt: { type: Date, expires: '1m', default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
   },
   {
     capped: {
